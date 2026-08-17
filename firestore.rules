@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.role == 'Admin';
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isStoreManager() {
+      return isSignedIn() && request.auth.token.role == 'StoreManager';
+    }
+
+    function canReadMasterData() {
+      return isAdmin() || isStoreManager();
+    }
+
+    function canReadDesigns() {
+      return isAdmin() || isStoreManager();
+    }
+
+    function canAccessInventory() {
+      return isAdmin() || isStoreManager();
+    }
+
+    match /users/{uid} {
+      allow get: if isSelf(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read, create: if isAdmin();
+      // Immutable ledger: no updates or deletes, even for Admins.
+      allow update, delete: if false;
+    }
+
+    match /masterData/{docId} {
+      allow read: if canReadMasterData();
+      allow write: if isAdmin();
+    }
+
+    match /wireSizes/{wireSizeId} {
+      allow read: if canReadMasterData();
+      allow write: if isAdmin();
+    }
+
+    match /coreMaterials/{coreMaterialId} {
+      allow read: if canReadMasterData();
+      allow write: if isAdmin();
+    }
+
+    match /designs/{designId} {
+      allow read: if canReadDesigns();
+      allow write: if isAdmin();
+
+      match /issuances/{issuanceId} {
+        allow read, write: if canAccessInventory();
+      }
+    }
+
+    match /inventory/{material} {
+      allow read, write: if canAccessInventory();
+
+      match /batches/{batchId} {
+        allow read, write: if canAccessInventory();
+      }
+      match /scrapLedger/{entryId} {
+        allow read, write: if canAccessInventory();
+      }
+    }
+
+    // Default deny for anything not explicitly matched above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

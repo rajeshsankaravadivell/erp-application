@@ -15,9 +15,11 @@ A comprehensive Enterprise Resource Planning (ERP) system built with modern web 
 
 ## Project Structure
 
-- `frontend/` - React-based user interface
-- `backend/` - Node.js/Express API server
+- `frontend/` - Next.js application (App Router), including Firebase Auth/Firestore integration
+  and Server Actions for data mutations
 - `docs/` - Documentation and specifications
+- `firebase.json`, `.firebaserc`, `firestore.rules`, `firestore.indexes.json` - Firebase project
+  configuration (Firestore rules/indexes; Cloud Functions are added in a later phase)
 
 ## Getting Started
 

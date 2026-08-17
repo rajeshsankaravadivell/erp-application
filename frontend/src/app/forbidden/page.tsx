@@ -1,16 +1,19 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoginForm } from "@/components/auth/login-form";
+import Link from "next/link";
 
-export default function LoginPage() {
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function ForbiddenPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Transformer Manufacturing ERP</CardDescription>
+          <CardTitle>Access denied</CardTitle>
+          <CardDescription>Your account doesn&apos;t have permission to view this page.</CardDescription>
         </CardHeader>
         <CardContent>
-          <LoginForm />
+          <Link href="/" className="text-primary underline underline-offset-4">
+            Back to home
+          </Link>
         </CardContent>
       </Card>
     </main>
