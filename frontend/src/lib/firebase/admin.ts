@@ -1,27 +1,25 @@
 import "server-only";
 
-import { cert, getApps, getApp, initializeApp, type App } from "firebase-admin/app";
+import { cert, getApp, initializeApp, type App, type Credential } from "firebase-admin/app";
 import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
-function loadCredential() {
+// Returns an explicit service-account credential built from .env.local, or
+// null if those vars aren't set. Used for local dev, where Application
+// Default Credentials usually aren't configured.
+function loadExplicitCredential(): Credential | null {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error(
-      "Missing FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY " +
-        "env vars — set them in frontend/.env.local from a rotated service-account key.",
-    );
-  }
+  if (!projectId || !clientEmail || !privateKey) return null;
 
-  return {
+  return cert({
     projectId,
     clientEmail,
     // .env files store the PEM with literal "\n" sequences; convert them back to real newlines.
     privateKey: privateKey.replace(/\\n/g, "\n"),
-  };
+  });
 }
 
 let app: App | undefined;
@@ -33,7 +31,20 @@ let app: App | undefined;
 // request.
 function getAdminApp(): App {
   if (!app) {
-    app = getApps().length ? getApp() : initializeApp({ credential: cert(loadCredential()) });
+    // Don't use getApps().length as a proxy for "the default app exists" —
+    // same fix as functions/src/lib/admin.ts: something else initializing a
+    // non-default-named app would make that check wrongly skip our own init.
+    try {
+      app = getApp();
+    } catch {
+      // In Cloud Run / Firebase App Hosting, Application Default Credentials
+      // are available automatically via the backend's attached service
+      // account — no explicit key needed there. Locally, fall back to the
+      // explicit service-account credential from .env.local (ADC usually
+      // isn't configured on a dev machine).
+      const explicitCredential = loadExplicitCredential();
+      app = explicitCredential ? initializeApp({ credential: explicitCredential }) : initializeApp();
+    }
   }
   return app;
 }

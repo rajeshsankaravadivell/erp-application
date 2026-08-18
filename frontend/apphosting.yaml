@@ -1,0 +1,41 @@
+# Firebase App Hosting config for the Next.js frontend.
+#
+# No FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY here —
+# src/lib/firebase/admin.ts falls back to Application Default Credentials
+# when those aren't set, and this backend's attached service account
+# (firebase-app-hosting-compute@...) already has the firebase.sdkAdminServiceAgent
+# role needed for Firestore/Auth Admin SDK access. Nothing secret to provision.
+#
+# These NEXT_PUBLIC_* values are the client-side Firebase Web SDK config —
+# safe to commit (protected by Firestore/Auth security rules, not secrecy).
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyAziMW8oztaKWqi8NRLUy-rs0DOxr401OY
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: erp-transformer-9865.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: erp-transformer-9865
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: erp-transformer-9865.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "1076516363357"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:1076516363357:web:24da687c0acece64b301b4"
+    availability:
+      - BUILD
+      - RUNTIME
